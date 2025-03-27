@@ -1,27 +1,39 @@
-# Practice
+# Angular Admin Panel with Authentication & Worker Management System
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
+This project is built using **Angular 16**, **JSON Server**, and **Angular Material UI**. It provides an admin panel where users can sign up, log in, and manage workers.  
 
-## Development server
+## Technologies Used  
+- **Angular 16**  
+- **Angular Material**   
+- **JSON Server**
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## How It Works  
 
-## Code scaffolding
+### Authentication: 
+  - Admins can **sign up** and **log in**.  
+  - Once logged in, a token is stored locally, and users are redirected to the admin panel.  
+  - If a user has a token, they can't access the login/signup page.  
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Admin Panel:  
+  - Admins can **check existing workers and also add, edit, delete workers**.  
+  - Each worker is linked to the admin who created them.  
 
-## Build
+## Installation & Setup  
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+### Clone the Repository: 
+   git clone https://github.com/asl1n/AdminPanel.git
+   cd AdminPanel
 
-## Running unit tests
+### Install Dependencies:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- npm install
 
-## Running end-to-end tests
+### Download and start JSON Server:
+ 
+ - npm install -g json-server
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+- json-server --watch db.json
 
-## Further help
+### Run Angular App:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- ng serve
