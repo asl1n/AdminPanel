@@ -12,6 +12,7 @@ import { WorkersService } from '../../service/workers.service';
 })
 export class ModalComponent implements OnInit {
   meroForm: FormGroup;
+  validEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
   education: string[] = [
     'Basic Level',
@@ -27,17 +28,19 @@ export class ModalComponent implements OnInit {
     private dialogRef: DialogRef<ModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: MeroType
   ) {
+
     this.meroForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      dob: ['', Validators.required],
+      email: ['', [Validators.required, Validators.pattern(this.validEmail)]],
+      dob: ['', Validators.required, Validators.max(Date.now())],
       gender: ['', Validators.required],
       education: ['', Validators.required],
       company: ['', Validators.required],
       experience: ['', Validators.required],
       salary: ['', Validators.required]
     });
+    
   }
 
   ngOnInit(): void {
