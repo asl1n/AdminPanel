@@ -1,14 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+
+interface Admin {
+  id: string;
+  email: string;
+  password: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private apiUrl = environment.apiUrl;
 
-  constructor(private router: Router) { }
-  setToken(token: string) {
+  constructor(
+    private router: Router, 
+    private http: HttpClient) {}
+
+  private setToken(token: string) {
     localStorage.setItem('token', token);
   }
 
@@ -16,22 +29,50 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  isLoggedIn() {
+  private setAdminId(adminId: string) {
+    localStorage.setItem('adminId', adminId);
+  }
+
+  getAdminId(): string | null {
+    return localStorage.getItem('adminId');
+  }
+
+  isLoggedIn(): boolean {
     return this.getToken() !== null;
   }
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('adminId');
     this.router.navigate(['login']);
   }
 
-  login({ email, password }: any): Observable<any> {
-    if (email === 'admin@gmail.com' && password === 'admin') {
-      this.setToken('token');
-      return of({ success: true });
-    }
-    else{
-      return throwError(() => new Error('Invalid credentials'));
-    }
+  signup({ email, password }: { email: string; password: string }): Observable<any> {
+    const newAdmin = { email, password };
+    return this.http.post<Admin>(`${this.apiUrl}/admins`, newAdmin)
+      .pipe(
+        map((admin) => {
+          this.setToken(admin.id);
+          this.setAdminId(admin.id);
+          return { success: true, admin };
+        }),
+        catchError(error => throwError(() => new Error('Signup failed')))
+      );
+  }
+
+  login({ email, password }: { email: string; password: string }): Observable<any> {
+    return this.http.get<Admin[]>(`${this.apiUrl}/admins?email=${email}`)
+      .pipe(
+        map((admins) => {
+          const admin = admins[0];
+          if (admin && admin.password === password) {
+            this.setToken(admin.id);
+            this.setAdminId(admin.id);
+            return { success: true, admin };
+          }
+          throw new Error('Invalid credentials');
+        }),
+        catchError(error => throwError(() => new Error('Invalid credentials')))
+      );
   }
 }

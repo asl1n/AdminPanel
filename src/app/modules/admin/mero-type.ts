@@ -1,12 +1,13 @@
 export interface MeroType {
-    id: number;
+  id?: number;
   firstName: string;
   lastName: string;
   email: string;
-  dob: Date;
-  gender: 'male' | 'female';
+  dob: string;
+  gender: string;
   education: string;
   company: string;
-  experience: number;
-  salary: number;
+  experience: string;
+  salary: string;
+  adminId?: string;
 }
