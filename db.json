@@ -1,29 +1,6 @@
 {
   "workers": [
-    {
-      "id": "1",
-      "firstName": "Example",
-      "lastName": "Surname",
-      "email": "Test@gmail.com",
-      "dob": "2002-11-21T18:15:00.000Z",
-      "gender": "male",
-      "education": "Higher Secondary Level",
-      "company": "Google",
-      "experience": "5",
-      "salary": "10000",
-      "adminId": "936f"
-    }
   ],
   "admins": [
-    {
-      "id": "936f",
-      "email": "test@gmail.com",
-      "password": "12345"
-    },
-    {
-      "id": "1af4",
-      "email": "aslinkarmacharya@gmail.com",
-      "password": "aslinkarmacharya@gmail.com"
-    }
   ]
 }
