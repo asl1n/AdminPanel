@@ -3,22 +3,22 @@
     {
       "id": "1",
       "firstName": "Example",
-      "lastName": "Kanxo",
+      "lastName": "Surname",
       "email": "Test@gmail.com",
       "dob": "2002-11-21T18:15:00.000Z",
       "gender": "male",
       "education": "Higher Secondary Level",
       "company": "Google",
       "experience": "5",
-      "salary": "1000",
+      "salary": "10000",
       "adminId": "936f"
     }
   ],
   "admins": [
     {
       "id": "936f",
-      "email": "aslin@gmail.com",
-      "password": "aslin"
+      "email": "test@gmail.com",
+      "password": "12345"
     }
   ]
 }
