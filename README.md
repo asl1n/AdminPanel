@@ -21,8 +21,9 @@ This project is built using **Angular 16**, **JSON Server**, and **Angular Mater
 ## Installation & Setup  
 
 ### Clone the Repository: 
-   git clone https://github.com/asl1n/AdminPanel.git
-   cd AdminPanel
+   - git clone https://github.com/asl1n/AdminPanel.git
+
+  -  cd AdminPanel
 
 ### Install Dependencies:
 
