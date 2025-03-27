@@ -38,6 +38,8 @@ export class LoginComponent implements OnInit {
           this.errorMessage = err.message || 'Login failed. Please check your credentials.';
         }
       });
+    } else {
+      this.errorMessage = 'Please fill in the required fields properly.';
     }
   }
 }
