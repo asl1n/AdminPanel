@@ -1,0 +1,16 @@
+.main-body {
+    padding-top: 20px;
+    max-width: 1248px;
+    margin: 0 auto;
+  
+    mat-form-field {
+      width: 100%;
+    }
+  
+    .table-container {
+      width: 100%;
+      overflow-x: auto; 
+      max-height: 80vh;
+    }
+  }
+  
