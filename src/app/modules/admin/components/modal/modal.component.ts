@@ -1,6 +1,6 @@
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MeroType } from '../../mero-type';
 import { WorkersService } from '../../service/workers.service';
@@ -33,7 +33,7 @@ export class ModalComponent implements OnInit {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.pattern(this.validEmail)]],
-      dob: ['', Validators.required, Validators.max(Date.now())],
+      dob: ['', [Validators.required, this.validDate]],
       gender: ['', Validators.required],
       education: ['', Validators.required],
       company: ['', Validators.required],
@@ -47,6 +47,14 @@ export class ModalComponent implements OnInit {
     if (this.data && this.data.id) {
       this.meroForm.patchValue(this.data);
     }
+  }
+
+  validDate(control: AbstractControl): ValidationErrors | null {
+    const inputDate = new Date(control.value);
+    const today = new Date();
+    const required = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+
+    return inputDate < required ? null : { pastDate: true };
   }
 
   meroFormSubmit() {

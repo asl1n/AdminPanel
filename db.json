@@ -1,10 +1,4 @@
 {
   "workers": [],
-  "admins": [
-    {
-      "id": "9308",
-      "email": "test@gmail.com",
-      "password": "Testuser@1"
-    }
-  ]
+  "admins": []
 }
