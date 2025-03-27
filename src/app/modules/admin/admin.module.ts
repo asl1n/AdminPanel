@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
@@ -16,23 +16,23 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
 
 import { AdminRoutingModule } from './admin-routing.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NavComponent } from './components/nav/nav.component';
 import { MainComponent } from './components/main/main.component';
 import { ModalComponent } from './components/modal/modal.component';
-import { HttpClientModule } from '@angular/common/http';
+import { AdminComponent } from './components/admin/admin.component';
 
 @NgModule({
   declarations: [
     MainComponent,
     NavComponent,
     ModalComponent,
+    AdminComponent,
   ],
   imports: [
-    BrowserModule,
+    CommonModule,
     AdminRoutingModule,
-    BrowserAnimationsModule,
     ReactiveFormsModule,
+
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
@@ -43,7 +43,6 @@ import { HttpClientModule } from '@angular/common/http';
     MatNativeDateModule,
     MatRadioModule,
     MatSelectModule,
-    HttpClientModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule
