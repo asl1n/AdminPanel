@@ -16,7 +16,7 @@ interface Admin {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
-  private sessionTime = 30 * 60 * 1000;
+  private sessionTime = 1000;
 
   constructor(private router: Router, private http: HttpClient) {}
 
@@ -89,6 +89,7 @@ export class AuthService {
   sessionTimeout() {
     setTimeout(() => {
       this.logout();
+      alert('Session timeout');
     }, this.sessionTime);
   }
 }
