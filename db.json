@@ -1,6 +1,4 @@
 {
-  "workers": [
-  ],
-  "admins": [
-  ]
+  "workers": [],
+  "admins": []
 }
