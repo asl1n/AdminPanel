@@ -1,4 +1,141 @@
 {
-  "workers": [],
-  "admins": []
+  "workers": [
+    {
+      "id": "b9a1",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@gmail.com",
+      "dob": "1990-05-15T18:30:00.000Z",
+      "gender": "male",
+      "education": "Masters",
+      "company": "TechSolutions",
+      "experience": "8",
+      "salary": "75000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "2f73",
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "email": "alice.smith@example.com",
+      "dob": "1985-07-22T18:30:00.000Z",
+      "gender": "female",
+      "education": "Bachelors",
+      "company": "BlueWave Corp",
+      "experience": "5",
+      "salary": "60000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "4d60",
+      "firstName": "Emily",
+      "lastName": "Johnson",
+      "email": "emily.johnson@outlook.com",
+      "dob": "1992-10-30T18:30:00.000Z",
+      "gender": "female",
+      "education": "Masters",
+      "company": "NextGen",
+      "experience": "3",
+      "salary": "65000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "a7d2",
+      "firstName": "Michael",
+      "lastName": "Brown",
+      "email": "michael.brown@domain.com",
+      "dob": "1980-03-05T18:30:00.000Z",
+      "gender": "male",
+      "education": "PhD",
+      "company": "InnovateTech",
+      "experience": "10",
+      "salary": "95000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "b8e1",
+      "firstName": "Olivia",
+      "lastName": "Taylor",
+      "email": "olivia.taylor@yahoo.com",
+      "dob": "1995-12-10T18:30:00.000Z",
+      "gender": "female",
+      "education": "Bachelors",
+      "company": "Skyline LLC",
+      "experience": "2",
+      "salary": "40000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "f3b6",
+      "firstName": "Daniel",
+      "lastName": "Wilson",
+      "email": "daniel.wilson@gmail.com",
+      "dob": "1988-06-18T18:30:00.000Z",
+      "gender": "male",
+      "education": "Bachelors",
+      "company": "ZenTech",
+      "experience": "7",
+      "salary": "72000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "f4c9",
+      "firstName": "Sophia",
+      "lastName": "Martinez",
+      "email": "sophia.martinez@aol.com",
+      "dob": "1991-09-05T18:30:00.000Z",
+      "gender": "female",
+      "education": "Masters",
+      "company": "SmartSystems",
+      "experience": "6",
+      "salary": "77000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "c7e8",
+      "firstName": "David",
+      "lastName": "Miller",
+      "email": "david.miller@hotmail.com",
+      "dob": "1975-01-25T18:30:00.000Z",
+      "gender": "male",
+      "education": "PhD",
+      "company": "GlobalReach",
+      "experience": "15",
+      "salary": "120000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "b6a0",
+      "firstName": "Charlotte",
+      "lastName": "Moore",
+      "email": "charlotte.moore@icloud.com",
+      "dob": "1982-08-12T18:30:00.000Z",
+      "gender": "female",
+      "education": "Masters",
+      "company": "Visionary Inc.",
+      "experience": "12",
+      "salary": "85000",
+      "adminId": "98c3"
+    },
+    {
+      "id": "e1c7",
+      "firstName": "James",
+      "lastName": "White",
+      "email": "james.white@gmail.com",
+      "dob": "1993-04-17T18:30:00.000Z",
+      "gender": "male",
+      "education": "Bachelors",
+      "company": "CreativeForce",
+      "experience": "4",
+      "salary": "55000",
+      "adminId": "98c3"
+    }
+  ],
+  "admins": [
+    {
+      "id": "98c3",
+      "email": "test@gmail.com",
+      "password": "Test@123"
+    }
+  ]
 }
