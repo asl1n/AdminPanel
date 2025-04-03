@@ -13,14 +13,14 @@ import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss']
+  styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements AfterViewInit {
   // Table columns to display
   displayedColumns: string[] = [
     'id',
-    'firstName', 
-    'lastName', 
+    'firstName',
+    'lastName',
     'email',
     'dob',
     'gender',
@@ -28,12 +28,12 @@ export class MainComponent implements AfterViewInit {
     'company',
     'experience',
     'salary',
-    'actions'
+    'actions',
   ];
-  
+
   dataSource: MeroType[] = []; // Holds the worker data
-  totalItems = 0;              // Total number of items for pagination
-  isLoading = false;           // Loading state
+  totalItems = 0; // Total number of items for pagination
+  isLoading = false; // Loading state
   filterControl = new FormControl(''); // Search input control
 
   // Get reference to paginator and sort from template
@@ -68,41 +68,45 @@ export class MainComponent implements AfterViewInit {
       this.sort.sortChange,
       this.paginator.page,
       this.filterControl.valueChanges.pipe(
-        debounceTime(1000),       //Wait for 1 second before emitting
+        debounceTime(1000), //Wait for 1 second before emitting
         // Emit only when the value has changed
         // This prevents unnecessary API calls
         // when the user is typing
         distinctUntilChanged()
       )
-    ).pipe(
-      startWith({}) // Initial load
-    ).subscribe(() => {
-      this.loadData();
-    });
+    )
+      .pipe(
+        startWith({}) // Initial load
+      )
+      .subscribe(() => {
+        this.loadData();
+      });
   }
 
   // Main data loading function
   loadData() {
     try {
       this.isLoading = true;
-      
-      this.workerService.getWorkersPaginated(
-        this.paginator.pageIndex + 1, // JSON Server uses 1-based index
-        this.paginator.pageSize,
-        this.sort.active || 'id',     // Default sort by ID
-        this.sort.direction || 'asc', // Default ascending
-        this.filterControl.value || ''// Search term
-      ).subscribe({
-        next: (response) => {
-          this.dataSource = response.data;
-          this.totalItems = response.total;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error(error);
-          this.handleAuthError();
-        }
-      });
+
+      this.workerService
+        .getWorkersPaginated(
+          this.paginator.pageIndex + 1, // JSON Server uses 1-based index
+          this.paginator.pageSize,
+          this.sort.active || 'id', // Default sort by ID
+          this.sort.direction || 'asc', // Default ascending
+          this.filterControl.value || '' // Search term
+        )
+        .subscribe({
+          next: (response) => {
+            this.dataSource = response.data;
+            this.totalItems = response.total;
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error(error);
+            this.handleAuthError();
+          },
+        });
     } catch (error) {
       this.handleAuthError();
     }
@@ -119,19 +123,19 @@ export class MainComponent implements AfterViewInit {
   deleteWorker(id: number) {
     this.workerService.deleteWorker(id).subscribe({
       next: () => this.loadData(), // Refresh data after delete
-      error: console.error
+      error: console.error,
     });
   }
 
   // Open edit modal
   openEditModal(data: MeroType) {
     const dialogRef = this.dialog.open(ModalComponent, { data });
-    
-    dialogRef.afterClosed().subscribe(result => {
+
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.workerService.editWorker(data.id, result).subscribe({
           next: () => this.loadData(), // Refresh data after edit
-          error: console.error
+          error: console.error,
         });
       }
     });
