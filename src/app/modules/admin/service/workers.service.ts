@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/services/auth.service';
 import { MeroType } from '../mero-type';
@@ -46,5 +46,36 @@ export class WorkersService {
       .pipe(
         catchError(error => throwError(() => new Error('Failed to delete worker')))
       );
+  }
+
+  getWorkersPaginated(
+    page: number,
+    pageSize: number,
+    sortField: string,
+    sortOrder: 'asc' | 'desc',
+    filter: string
+  ): Observable<{ data: MeroType[]; total: number }> {
+    const adminId = this.authService.getAdminId();
+    
+    let params = new HttpParams()
+      .set('adminId', adminId)
+      .set('_page', page.toString())
+      .set('_limit', pageSize.toString())
+      .set('_sort', sortField)
+      .set('_order', sortOrder);
+
+    if (filter) {
+      params = params.set('q', filter);
+    }
+    return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { 
+      params,
+      observe: 'response'
+    }).pipe(
+      map(response => ({
+        data: response.body as MeroType[],
+        total: Number(response.headers.get('X-Total-Count')) || 0
+      })),
+      catchError(error => throwError(() => new Error('Failed to fetch workers')))
+    );
   }
 }
