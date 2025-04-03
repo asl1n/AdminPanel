@@ -14,6 +14,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { NavComponent } from './components/nav/nav.component';
@@ -45,7 +46,8 @@ import { AdminComponent } from './components/admin/admin.component';
     MatSelectModule,
     MatTableModule,
     MatPaginatorModule,
-    MatSortModule
+    MatSortModule,
+    MatProgressBarModule,
   ],
 })
 export class AdminModule { }
