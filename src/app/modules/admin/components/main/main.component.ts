@@ -1,21 +1,23 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import { Component, AfterViewInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { WorkersService } from '../../service/workers.service';
 import { MeroType } from '../../mero-type';
-import { ModalComponent } from '../modal/modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ModalComponent } from '../modal/modal.component';
+import { FormControl } from '@angular/forms';
 import { merge, startWith, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss']
 })
-export class MainComponent implements AfterViewInit{
-  displayedColumns: string[] = 
-  [
+export class MainComponent implements AfterViewInit {
+  // Table columns to display
+  displayedColumns: string[] = [
     'id',
     'firstName', 
     'lastName', 
@@ -28,60 +30,106 @@ export class MainComponent implements AfterViewInit{
     'salary',
     'actions'
   ];
-  dataSource!: MatTableDataSource<MeroType>;
+  
+  dataSource: MeroType[] = []; // Holds the worker data
+  totalItems = 0;              // Total number of items for pagination
+  isLoading = false;           // Loading state
+  filterControl = new FormControl(''); // Search input control
 
+  // Get reference to paginator and sort from template
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
-  private workerService: WorkersService,
-  private dialog: MatDialog
-  ){}
+    private workerService: WorkersService,
+    private dialog: MatDialog,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
-  getWorkers(){
-    this.workerService.getWorkers().subscribe({
-      next: (val: MeroType[]) => {
-        this.dataSource = new MatTableDataSource(val);
-        this.dataSource.sort = this.sort;
-        this.dataSource.paginator = this.paginator;
-      },
-      error: console.log
-    })
-  }
+  ngAfterViewInit() {
+    // Check authentication first
+    if (!this.authService.getAdminId()) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  ngOnInit(): void {
-    this.getWorkers();
-  }
+    // Set initial pagination values
+    this.paginator.pageIndex = 0;
+    this.paginator.pageSize = 5;
 
-  editWorker(id: number, updatedData: Partial<MeroType>){
-    this.workerService.editWorker(id, updatedData).subscribe({
-      next: (res) =>{
-        console.log('edited',res);
-      }
+    // Reset to first page when sorting changes
+    this.sort.sortChange.subscribe(() => {
+      this.paginator.pageIndex = 0;
+    });
+
+    // Combine all data-changing events
+    merge(
+      this.sort.sortChange,        // Sorting changes
+      this.paginator.page,         // Pagination changes
+      this.filterControl.valueChanges.pipe( // Filter changes
+        debounceTime(1000),         // Wait 1 sec after typing
+        distinctUntilChanged()     // Only emit when value changes
+    ).pipe(
+      startWith({})                // Initial load trigger
+    ).subscribe(() => {
+      this.loadData();
     });
   }
 
-  deleteWorker(id: number){
-    this.workerService.deleteWorker(id).subscribe({
-      next: (res) =>{
-        this.getWorkers();
-      },
-      error: console.log
-    });
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+  // Main data loading function
+  loadData() {
+    try {
+      this.isLoading = true;
+      
+      this.workerService.getWorkersPaginated(
+        this.paginator.pageIndex + 1, // JSON Server uses 1-based index
+        this.paginator.pageSize,
+        this.sort.active || 'id',     // Default sort by ID
+        this.sort.direction || 'asc', // Default ascending
+        this.filterControl.value || ''// Search term
+      ).subscribe({
+        next: (response) => {
+          this.dataSource = response.data;
+          this.totalItems = response.total;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error(error);
+          this.handleAuthError();
+        }
+      });
+    } catch (error) {
+      this.handleAuthError();
     }
   }
 
-  openEditModal(data: MeroType){
-    this.dialog.open(ModalComponent, {
-      data, 
+  // Handle authentication errors
+  private handleAuthError() {
+    this.isLoading = false;
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // Delete worker
+  deleteWorker(id: number) {
+    this.workerService.deleteWorker(id).subscribe({
+      next: () => this.loadData(), // Refresh data after delete
+      error: console.error
+    });
+  }
+
+  // Open edit modal
+  openEditModal(data: MeroType) {
+    const dialogRef = this.dialog.open(ModalComponent, { data });
+    
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.workerService.editWorker(data.id, result).subscribe({
+          next: () => this.loadData(), // Refresh data after edit
+          error: console.error
+        });
+      }
     });
   }
 }
