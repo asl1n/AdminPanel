@@ -1,6 +1,12 @@
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MeroType } from '../../mero-type';
 import { WorkersService } from '../../service/workers.service';
@@ -8,7 +14,7 @@ import { WorkersService } from '../../service/workers.service';
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
-  styleUrls: ['./modal.component.scss']
+  styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent implements OnInit {
   meroForm: FormGroup;
@@ -19,7 +25,7 @@ export class ModalComponent implements OnInit {
     'Secondary Level',
     'Higher Secondary Level',
     'Diploma',
-    'Graduated'
+    'Graduated',
   ];
 
   constructor(
@@ -28,7 +34,6 @@ export class ModalComponent implements OnInit {
     private dialogRef: DialogRef<ModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: MeroType
   ) {
-
     this.meroForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -38,9 +43,8 @@ export class ModalComponent implements OnInit {
       education: ['', Validators.required],
       company: ['', Validators.required],
       experience: ['', Validators.required],
-      salary: ['', Validators.required]
+      salary: ['', Validators.required],
     });
-    
   }
 
   ngOnInit(): void {
@@ -52,34 +56,28 @@ export class ModalComponent implements OnInit {
   validDate(control: AbstractControl): ValidationErrors | null {
     const inputDate = new Date(control.value);
     const today = new Date();
-    const required = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+    const required = new Date(
+      today.getFullYear() - 16,
+      today.getMonth(),
+      today.getDate()
+    );
 
     return inputDate < required ? null : { pastDate: true };
   }
 
   meroFormSubmit() {
     if (this.meroForm.valid) {
-      if (this.data && this.data.id) {
-        this.workerService.editWorker(this.data.id, this.meroForm.value as MeroType).subscribe({
-          next: () => {
-            this.dialogRef.close(); 
-            location.reload();
-          },
-          error: (err) => {
-            console.error('Error editing worker:', err);
-          }
-        });
-      } else {
-        this.workerService.addWorker(this.meroForm.value as MeroType).subscribe({
-          next: () => {
-            this.dialogRef.close(); 
-            location.reload();
-          },
-          error: (err) => {
-            console.error('Error adding worker:', err);
-          }
-        });
-      }
+      const operation = this.data?.id
+        ? this.workerService.editWorker(
+            this.data.id,
+            this.meroForm.value as MeroType
+          )
+        : this.workerService.addWorker(this.meroForm.value as MeroType);
+
+      operation.subscribe({
+        next: () => this.dialogRef.close(true),
+        error: (err) => console.error('Operation failed:', err),
+      });
     }
   }
 }
