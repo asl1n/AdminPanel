@@ -75,7 +75,7 @@ export class ModalComponent implements OnInit {
         : this.workerService.addWorker(this.meroForm.value as MeroType);
 
       operation.subscribe({
-        next: () => this.dialogRef.close(true),
+        next: () => this.dialogRef.close(),
         error: (err) => console.error('Operation failed:', err),
       });
     }

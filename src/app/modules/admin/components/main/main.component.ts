@@ -45,8 +45,8 @@ export class MainComponent implements AfterViewInit {
   private destroy$ = new Subject<void>();
 
   // Get reference to paginator and sort from template
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   constructor(
     private workerService: WorkersService,

@@ -24,11 +24,11 @@ export class WorkersService {
 
   // Get for proper backend search and pag
   getWorkers(
-    page: number,
-    pageSize: number,
-    sortField: string,
-    sortOrder: 'asc' | 'desc',
-    filter: string
+    page: number = 1,
+    pageSize: number = 5,
+    sortField: string = 'id',
+    sortOrder: 'asc' | 'desc' = 'asc',
+    filter: string = ''
   ): Observable<{ data: MeroType[]; total: number }> {
     try {
       const adminId = this.getAdminId();
