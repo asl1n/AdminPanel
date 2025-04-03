@@ -6,7 +6,14 @@ import { MeroType } from '../../mero-type';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../modal/modal.component';
 import { FormControl } from '@angular/forms';
-import { merge, startWith, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  merge,
+  startWith,
+  debounceTime,
+  distinctUntilChanged,
+  takeUntil,
+  Subject,
+} from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -35,6 +42,7 @@ export class MainComponent implements AfterViewInit {
   totalItems = 0; // Total number of items for pagination
   isLoading = false; // Loading state
   filterControl = new FormControl(''); // Search input control
+  private destroy$ = new Subject<void>();
 
   // Get reference to paginator and sort from template
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -131,13 +139,17 @@ export class MainComponent implements AfterViewInit {
   openEditModal(data: MeroType) {
     const dialogRef = this.dialog.open(ModalComponent, { data });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.workerService.editWorker(data.id, result).subscribe({
-          next: () => this.loadData(), // Refresh data after edit
-          error: console.error,
-        });
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        if (result) {
+          this.loadData();
+        }
+      });
+  }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
