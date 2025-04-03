@@ -7,15 +7,12 @@ import { AuthService } from 'src/app/services/auth.service';
 import { MeroType } from '../mero-type';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WorkersService {
   private apiUrl = environment.apiUrl;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getAdminId(): string {
     const adminId = this.authService.getAdminId();
@@ -26,51 +23,62 @@ export class WorkersService {
   }
 
   // Get for proper backend search and pag
-getWorkers(
-  page: number,
-  pageSize: number,
-  sortField: string,
-  sortOrder: 'asc' | 'desc',
-  filter: string
-): Observable<{ data: MeroType[]; total: number }> {
-  try {
-    const adminId = this.getAdminId();
-    
-    //  params
-    let params = new HttpParams()
-      .set('adminId', adminId)
-      .set('_page', page.toString())
-      .set('_limit', pageSize.toString())
-      .set('_sort', sortField)
-      .set('_order', sortOrder);
+  getWorkers(
+    page: number,
+    pageSize: number,
+    sortField: string,
+    sortOrder: 'asc' | 'desc',
+    filter: string
+  ): Observable<{ data: MeroType[]; total: number }> {
+    try {
+      const adminId = this.getAdminId();
 
-    // Add search filters
-    if (filter) {
-      params = params
-        .set('firstName_like', filter)
-        .set('lastName_like', filter)
-        .set('email_like', filter)
-        .set('company_like', filter);
+      //  params
+      let params = new HttpParams()
+        .set('adminId', adminId)
+        .set('_page', page.toString())
+        .set('_limit', pageSize.toString())
+        .set('_sort', sortField)
+        .set('_order', sortOrder);
+
+      // Add search filters
+      if (filter) {
+        params = params
+          .set('firstName_like', filter)
+          .set('lastName_like', filter)
+          .set('email_like', filter)
+          .set('company_like', filter);
+      }
+
+      // First get total count
+      const countParams = params
+        .delete('_page')
+        .delete('_limit')
+        .delete('_sort')
+        .delete('_order');
+
+      return this.http
+        .get<MeroType[]>(`${this.apiUrl}/workers`, { params: countParams })
+        .pipe(
+          switchMap((allResults) => {
+            const total = allResults.length;
+            return this.http
+              .get<MeroType[]>(`${this.apiUrl}/workers`, { params })
+              .pipe(
+                map((paginatedResults) => ({
+                  data: paginatedResults,
+                  total: total,
+                }))
+              );
+          }),
+          catchError((error) =>
+            throwError(() => new Error('Failed to fetch workers'))
+          )
+        );
+    } catch (error) {
+      return throwError(() => error);
     }
-
-    // First get total count
-    const countParams = params.delete('_page').delete('_limit').delete('_sort').delete('_order');
-    
-    return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { params: countParams }).pipe(
-      switchMap(allResults => {
-        const total = allResults.length;
-        return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { params }).pipe(
-          map(paginatedResults => ({
-            data: paginatedResults,
-            total: total
-          }))
-      }),
-      catchError(error => throwError(() => new Error('Failed to fetch workers')))
-    );
-  } catch (error) {
-    return throwError(() => error);
   }
-}
 
   addWorker(data: Omit<MeroType, 'id'>): Observable<MeroType> {
     try {
@@ -84,7 +92,7 @@ getWorkers(
 
   deleteWorker(id: number): Observable<void> {
     try {
-      this.getAdminId(); 
+      this.getAdminId();
       return this.http.delete<void>(`${this.apiUrl}/workers/${id}`);
     } catch (error) {
       return throwError(() => error);
@@ -93,8 +101,11 @@ getWorkers(
 
   editWorker(id: number, updatedData: Partial<MeroType>): Observable<MeroType> {
     try {
-      this.getAdminId(); 
-      return this.http.patch<MeroType>(`${this.apiUrl}/workers/${id}`, updatedData);
+      this.getAdminId();
+      return this.http.patch<MeroType>(
+        `${this.apiUrl}/workers/${id}`,
+        updatedData
+      );
     } catch (error) {
       return throwError(() => error);
     }
