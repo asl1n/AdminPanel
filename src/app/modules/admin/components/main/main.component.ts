@@ -65,13 +65,17 @@ export class MainComponent implements AfterViewInit {
 
     // Combine all data-changing events
     merge(
-      this.sort.sortChange,        // Sorting changes
-      this.paginator.page,         // Pagination changes
-      this.filterControl.valueChanges.pipe( // Filter changes
-        debounceTime(1000),         // Wait 1 sec after typing
-        distinctUntilChanged()     // Only emit when value changes
+      this.sort.sortChange,
+      this.paginator.page,
+      this.filterControl.valueChanges.pipe(
+        debounceTime(1000),       //Wait for 1 second before emitting
+        // Emit only when the value has changed
+        // This prevents unnecessary API calls
+        // when the user is typing
+        distinctUntilChanged()
+      )
     ).pipe(
-      startWith({})                // Initial load trigger
+      startWith({}) // Initial load
     ).subscribe(() => {
       this.loadData();
     });
