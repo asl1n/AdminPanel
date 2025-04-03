@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/services/auth.service';
 import { MeroType } from '../mero-type';
@@ -25,41 +25,52 @@ export class WorkersService {
     return adminId;
   }
 
-  getWorkersPaginated(
-    page: number,
-    pageSize: number,
-    sortField: string,
-    sortOrder: 'asc' | 'desc',
-    filter: string
-  ): Observable<{ data: MeroType[]; total: number }> {
-    try {
-      const adminId = this.getAdminId();
-      
-      let params = new HttpParams()
-        .set('adminId', adminId)  
-        .set('_page', page.toString())
-        .set('_limit', pageSize.toString())
-        .set('_sort', sortField)
-        .set('_order', sortOrder);
+  // Get for proper backend search and pag
+getWorkers(
+  page: number,
+  pageSize: number,
+  sortField: string,
+  sortOrder: 'asc' | 'desc',
+  filter: string
+): Observable<{ data: MeroType[]; total: number }> {
+  try {
+    const adminId = this.getAdminId();
+    
+    //  params
+    let params = new HttpParams()
+      .set('adminId', adminId)
+      .set('_page', page.toString())
+      .set('_limit', pageSize.toString())
+      .set('_sort', sortField)
+      .set('_order', sortOrder);
 
-      if (filter) {
-        params = params.set('q', filter);
-      }
-
-      return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { 
-        params,
-        observe: 'response'
-      }).pipe(
-        map(response => ({
-          data: response.body as MeroType[],
-          total: Number(response.headers.get('X-Total-Count')) || 0
-        })),
-        catchError(error => throwError(() => new Error('Failed to fetch workers')))
-      );
-    } catch (error) {
-      return throwError(() => error);
+    // Add search filters
+    if (filter) {
+      params = params
+        .set('firstName_like', filter)
+        .set('lastName_like', filter)
+        .set('email_like', filter)
+        .set('company_like', filter);
     }
+
+    // First get total count
+    const countParams = params.delete('_page').delete('_limit').delete('_sort').delete('_order');
+    
+    return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { params: countParams }).pipe(
+      switchMap(allResults => {
+        const total = allResults.length;
+        return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { params }).pipe(
+          map(paginatedResults => ({
+            data: paginatedResults,
+            total: total
+          }))
+      }),
+      catchError(error => throwError(() => new Error('Failed to fetch workers')))
+    );
+  } catch (error) {
+    return throwError(() => error);
   }
+}
 
   addWorker(data: Omit<MeroType, 'id'>): Observable<MeroType> {
     try {

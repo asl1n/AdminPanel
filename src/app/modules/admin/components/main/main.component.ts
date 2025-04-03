@@ -89,7 +89,7 @@ export class MainComponent implements AfterViewInit {
       this.isLoading = true;
 
       this.workerService
-        .getWorkersPaginated(
+        .getWorkers(
           this.paginator.pageIndex + 1, // JSON Server uses 1-based index
           this.paginator.pageSize,
           this.sort.active || 'id', // Default sort by ID
