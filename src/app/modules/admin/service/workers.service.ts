@@ -36,7 +36,7 @@ export class WorkersService {
       const adminId = this.getAdminId();
       
       let params = new HttpParams()
-        .set('adminId', adminId)  // Filter by adminId
+        .set('adminId', adminId)  
         .set('_page', page.toString())
         .set('_limit', pageSize.toString())
         .set('_sort', sortField)
@@ -73,7 +73,7 @@ export class WorkersService {
 
   deleteWorker(id: number): Observable<void> {
     try {
-      this.getAdminId(); // Verify adminId exists
+      this.getAdminId(); 
       return this.http.delete<void>(`${this.apiUrl}/workers/${id}`);
     } catch (error) {
       return throwError(() => error);
@@ -82,7 +82,7 @@ export class WorkersService {
 
   editWorker(id: number, updatedData: Partial<MeroType>): Observable<MeroType> {
     try {
-      this.getAdminId(); // Verify adminId exists
+      this.getAdminId(); 
       return this.http.patch<MeroType>(`${this.apiUrl}/workers/${id}`, updatedData);
     } catch (error) {
       return throwError(() => error);

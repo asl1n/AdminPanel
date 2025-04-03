@@ -33,8 +33,13 @@ export class AuthService {
     localStorage.setItem('adminId', adminId);
   }
 
-  getAdminId(): string | null {
-    return localStorage.getItem('adminId');
+  getAdminId(): string {
+    const adminId = localStorage.getItem('adminId');
+    if (!adminId) {
+      this.logout();
+      throw new Error('No admin ID found');
+    }
+    return adminId;
   }
 
   isLoggedIn(): boolean {
