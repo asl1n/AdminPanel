@@ -13,39 +13,16 @@ export class WorkersService {
   private apiUrl = environment.apiUrl;
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
-  addWorker(data: MeroType): Observable<MeroType> {
+  private getAdminId(): string {
     const adminId = this.authService.getAdminId();
-    const workerData = { ...data, adminId };
-    return this.http.post<MeroType>(`${this.apiUrl}/workers`, workerData)
-      .pipe(
-        catchError(error => throwError(() => new Error('Failed to add worker')))
-      );
-  }
-
-  getWorkers(): Observable<MeroType[]> {
-    const adminId = this.authService.getAdminId();
-    return this.http.get<MeroType[]>(`${this.apiUrl}/workers?adminId=${adminId}`)
-      .pipe(
-        catchError(error => throwError(() => new Error('Failed to fetch workers')))
-      );
-  }
-
-  editWorker(id: number, updatedData: Partial<MeroType>): Observable<MeroType> {
-    return this.http.patch<MeroType>(`${this.apiUrl}/workers/${id}`, updatedData)
-      .pipe(
-        catchError(error => throwError(() => new Error('Failed to edit worker')))
-      );
-  }
-
-  deleteWorker(id: number): Observable<MeroType> {
-    return this.http.delete<MeroType>(`${this.apiUrl}/workers/${id}`)
-      .pipe(
-        catchError(error => throwError(() => new Error('Failed to delete worker')))
-      );
+    if (!adminId) {
+      throw new Error('No admin ID found');
+    }
+    return adminId;
   }
 
   getWorkersPaginated(
@@ -55,27 +32,60 @@ export class WorkersService {
     sortOrder: 'asc' | 'desc',
     filter: string
   ): Observable<{ data: MeroType[]; total: number }> {
-    const adminId = this.authService.getAdminId();
-    
-    let params = new HttpParams()
-      .set('adminId', adminId)
-      .set('_page', page.toString())
-      .set('_limit', pageSize.toString())
-      .set('_sort', sortField)
-      .set('_order', sortOrder);
+    try {
+      const adminId = this.getAdminId();
+      
+      let params = new HttpParams()
+        .set('adminId', adminId)  // Filter by adminId
+        .set('_page', page.toString())
+        .set('_limit', pageSize.toString())
+        .set('_sort', sortField)
+        .set('_order', sortOrder);
 
-    if (filter) {
-      params = params.set('q', filter);
+      if (filter) {
+        params = params.set('q', filter);
+      }
+
+      return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { 
+        params,
+        observe: 'response'
+      }).pipe(
+        map(response => ({
+          data: response.body as MeroType[],
+          total: Number(response.headers.get('X-Total-Count')) || 0
+        })),
+        catchError(error => throwError(() => new Error('Failed to fetch workers')))
+      );
+    } catch (error) {
+      return throwError(() => error);
     }
-    return this.http.get<MeroType[]>(`${this.apiUrl}/workers`, { 
-      params,
-      observe: 'response'
-    }).pipe(
-      map(response => ({
-        data: response.body as MeroType[],
-        total: Number(response.headers.get('X-Total-Count')) || 0
-      })),
-      catchError(error => throwError(() => new Error('Failed to fetch workers')))
-    );
+  }
+
+  addWorker(data: Omit<MeroType, 'id'>): Observable<MeroType> {
+    try {
+      const adminId = this.getAdminId();
+      const workerData = { ...data, adminId };
+      return this.http.post<MeroType>(`${this.apiUrl}/workers`, workerData);
+    } catch (error) {
+      return throwError(() => error);
+    }
+  }
+
+  deleteWorker(id: number): Observable<void> {
+    try {
+      this.getAdminId(); // Verify adminId exists
+      return this.http.delete<void>(`${this.apiUrl}/workers/${id}`);
+    } catch (error) {
+      return throwError(() => error);
+    }
+  }
+
+  editWorker(id: number, updatedData: Partial<MeroType>): Observable<MeroType> {
+    try {
+      this.getAdminId(); // Verify adminId exists
+      return this.http.patch<MeroType>(`${this.apiUrl}/workers/${id}`, updatedData);
+    } catch (error) {
+      return throwError(() => error);
+    }
   }
 }
