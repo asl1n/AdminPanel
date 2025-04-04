@@ -67,17 +67,31 @@ export class ModalComponent implements OnInit {
 
   meroFormSubmit() {
     if (this.meroForm.valid) {
-      const operation = this.data?.id
-        ? this.workerService.editWorker(
-            this.data.id,
-            this.meroForm.value as MeroType
-          )
-        : this.workerService.addWorker(this.meroForm.value as MeroType);
-
-      operation.subscribe({
-        next: () => this.dialogRef.close(),
-        error: (err) => console.error('Operation failed:', err),
-      });
+      if (this.data && this.data.id) {
+        this.workerService
+          .editWorker(this.data.id, this.meroForm.value as MeroType)
+          .subscribe({
+            next: () => {
+              this.dialogRef.close();
+              location.reload();
+            },
+            error: (err) => {
+              console.error('Error editing worker:', err);
+            },
+          });
+      } else {
+        this.workerService
+          .addWorker(this.meroForm.value as MeroType)
+          .subscribe({
+            next: () => {
+              this.dialogRef.close();
+              location.reload();
+            },
+            error: (err) => {
+              console.error('Error adding worker:', err);
+            },
+          });
+      }
     }
   }
 }

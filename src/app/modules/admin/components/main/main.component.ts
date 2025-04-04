@@ -1,29 +1,18 @@
-import { Component, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { WorkersService } from '../../service/workers.service';
 import { MeroType } from '../../mero-type';
-import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../modal/modal.component';
-import { FormControl } from '@angular/forms';
-import {
-  merge,
-  startWith,
-  debounceTime,
-  distinctUntilChanged,
-  takeUntil,
-  Subject,
-} from 'rxjs';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
 })
-export class MainComponent implements AfterViewInit {
-  // Table columns to display
+export class MainComponent {
   displayedColumns: string[] = [
     'id',
     'firstName',
@@ -37,119 +26,60 @@ export class MainComponent implements AfterViewInit {
     'salary',
     'actions',
   ];
+  dataSource!: MatTableDataSource<MeroType>;
 
-  dataSource: MeroType[] = []; // Holds the worker data
-  totalItems = 0; // Total number of items for pagination
-  isLoading = false; // Loading state
-  filterControl = new FormControl(''); // Search input control
-  private destroy$ = new Subject<void>();
-
-  // Get reference to paginator and sort from template
-  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private workerService: WorkersService,
-    private dialog: MatDialog,
-    private router: Router,
-    private authService: AuthService
+    private dialog: MatDialog
   ) {}
 
-  ngAfterViewInit() {
-    // Check authentication first
-    if (!this.authService.getAdminId()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    // Set initial pagination values
-    this.paginator.pageIndex = 0;
-    this.paginator.pageSize = 5;
-
-    // Reset to first page when sorting changes
-    this.sort.sortChange.subscribe(() => {
-      this.paginator.pageIndex = 0;
+  getWorkers() {
+    this.workerService.getWorkers().subscribe({
+      next: (val: MeroType[]) => {
+        this.dataSource = new MatTableDataSource(val);
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+      },
+      error: console.log,
     });
-
-    // Combine all data-changing events
-    merge(
-      this.sort.sortChange,
-      this.paginator.page,
-      this.filterControl.valueChanges.pipe(
-        debounceTime(1000), //Wait for 1 second before emitting
-        // Emit only when the value has changed
-        // This prevents unnecessary API calls
-        // when the user is typing
-        distinctUntilChanged()
-      )
-    )
-      .pipe(
-        startWith({}) // Initial load
-      )
-      .subscribe(() => {
-        this.loadData();
-      });
   }
 
-  // Main data loading function
-  loadData() {
-    try {
-      this.isLoading = true;
-
-      this.workerService
-        .getWorkers(
-          this.paginator.pageIndex + 1, // JSON Server uses 1-based index
-          this.paginator.pageSize,
-          this.sort.active || 'id', // Default sort by ID
-          this.sort.direction || 'asc', // Default ascending
-          this.filterControl.value || '' // Search term
-        )
-        .subscribe({
-          next: (response) => {
-            this.dataSource = response.data;
-            this.totalItems = response.total;
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error(error);
-            this.handleAuthError();
-          },
-        });
-    } catch (error) {
-      this.handleAuthError();
-    }
+  ngOnInit(): void {
+    this.getWorkers();
   }
 
-  // Handle authentication errors
-  private handleAuthError() {
-    this.isLoading = false;
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  editWorker(id: number, updatedData: Partial<MeroType>) {
+    this.workerService.editWorker(id, updatedData).subscribe({
+      next: (res) => {
+        console.log('edited', res);
+      },
+    });
   }
 
-  // Delete worker
   deleteWorker(id: number) {
     this.workerService.deleteWorker(id).subscribe({
-      next: () => this.loadData(), // Refresh data after delete
-      error: console.error,
+      next: (res) => {
+        this.getWorkers();
+      },
+      error: console.log,
     });
   }
 
-  // Open edit modal
-  openEditModal(data: MeroType) {
-    const dialogRef = this.dialog.open(ModalComponent, { data });
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
 
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
-        if (result) {
-          this.loadData();
-        }
-      });
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+
+  openEditModal(data: MeroType) {
+    this.dialog.open(ModalComponent, {
+      data,
+    });
   }
 }
